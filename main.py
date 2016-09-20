@@ -21,7 +21,8 @@ class BlogHandler(webapp2.RequestHandler):
         """
 
         # TODO - filter the query so that only posts by the given user
-        return None
+        query = Post.all().filter('author =', user).order('-created')
+        return query.fetch(limit=limit, offset=offset)
 
     def get_user_by_name(self, username):
         """ Get a user object from the db, based on their username """
@@ -79,6 +80,7 @@ class BlogIndexHandler(BlogHandler):
 
         # If request is for a specific page, set page number and offset accordingly
         page = self.request.get("page")
+        #username = self.request.get("username")
         offset = 0
         page = page and int(page)
         if page:
@@ -99,6 +101,7 @@ class BlogIndexHandler(BlogHandler):
         else:
             prev_page = None
 
+        #if Post.all().count() > offset+self.page_size:
         if len(posts) == self.page_size and Post.all().count() > offset+self.page_size:
             next_page = page + 1
         else:
@@ -288,7 +291,7 @@ class LogoutHandler(BlogHandler):
 
     def get(self):
         self.logout_user()
-        self.redirect('/blog')
+        self.redirect('/login')
 
 app = webapp2.WSGIApplication([
     ('/', IndexHandler),
